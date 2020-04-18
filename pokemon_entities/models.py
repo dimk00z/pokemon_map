@@ -11,7 +11,9 @@ class PokemonElementType(models.Model):
 
     strong_against = models.ManyToManyField(
         "self", related_name='+',
-        blank=True)
+        blank=True,
+        symmetrical=False
+    )
 
     def __str__(self):
         return self.title
