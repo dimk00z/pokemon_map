@@ -4,7 +4,8 @@ from django.db import models
 class PokemonElementType(models.Model):
     """Элемент"""
     title = models.TextField(max_length=100,
-                             verbose_name='стихия')
+                             verbose_name='стихия',
+                             null=False)
     img = models.ImageField(
         upload_to='elem_images',
         verbose_name='Изображение элемента', null=True, blank=True)
@@ -12,7 +13,8 @@ class PokemonElementType(models.Model):
     strong_against = models.ManyToManyField(
         "self", related_name='+',
         blank=True,
-        symmetrical=False
+        symmetrical=False,
+        verbose_name='Элемент силен против'
     )
 
     def __str__(self):
@@ -23,32 +25,31 @@ class Pokemon(models.Model):
     """Покемон"""
     title_ru = models.TextField(default='завр',
                                 max_length=100,
-                                null=False,
-                                verbose_name='Название покемона на русском')
+                                verbose_name='Название покемона на русском',
+                                null=False)
     title_en = models.CharField(
         max_length=100,
-        verbose_name='Название покемона на английском', blank=True)
+        verbose_name='Название покемона на английском', null=False, blank=True)
     title_jp = models.CharField(
         max_length=100,
-        verbose_name='Название  на японском', blank=True)
+        verbose_name='Название на японском', null=False, blank=True)
     image = models.ImageField(
         upload_to='poke_images',
         verbose_name='Изображение покемона', null=True, blank=True)
     description = models.TextField(
-        null=True,
-        blank=True,
-        verbose_name='Описание')
+        verbose_name='Описание покемона', default='', null=False, blank=True)
     previous_evolution = models.ForeignKey(
         "self",
         verbose_name='Из кого эволюционирует',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='next_evolutions')
     element_type = models.ManyToManyField(
         PokemonElementType,
         blank=True,
-        verbose_name='Элемент')
+        verbose_name='Элемент',
+        related_name='pokemon_elements')
 
     def __str__(self):
         return f"{self.title_ru}"
@@ -89,7 +90,5 @@ class PokemonEntity(models.Model):
         verbose_name='Выносливость покемона')
     pokemon = models.ForeignKey(Pokemon,
                                 on_delete=models.CASCADE,
-                                help_text='Note')
-
-    def __str__(self):
-        return f"{self.pokemon.title} lat:{self.lat} lot: {self.lot}"
+                                related_name='pokemon_entities',
+                                verbose_name='Покемон')
